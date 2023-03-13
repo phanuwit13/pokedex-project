@@ -97,6 +97,7 @@ export interface OfficialArtwork {
 export interface Other {
   dream_world: DreamWorld
   home: Home
+  'official-artwork': OfficialArtwork
 }
 
 export interface RedBlue {

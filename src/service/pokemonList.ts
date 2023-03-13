@@ -1,4 +1,3 @@
-import { AxiosError, AxiosResponse } from 'axios'
 import axios from 'axios'
 import { POKEMON_BASE_URL } from '@/utils/constant'
 import { handleResponse, IResponse } from '@/utils/response'
@@ -11,8 +10,8 @@ interface IGetPokemonListResponse extends IResponse {
 
 export const pokemonListServices = {
   getPokemonList: async (
-    limit?: string,
-    offset?: string
+    limit?: number,
+    offset?: number
   ): Promise<IGetPokemonListResponse> => {
     try {
       const response = await axios.get(

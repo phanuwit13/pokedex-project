@@ -15,7 +15,7 @@ const router = createBrowserRouter([
 
 function App() {
   return (
-    <div className='bg-[#F3F4F6] min-h-[100vh]'>
+    <div className='bg-[url("/images/list_bg.jpg")] min-h-[100vh]'>
       <RouterProvider router={router} />
     </div>
   )

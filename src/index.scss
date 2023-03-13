@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+*{
+  color: #F3F4F6;
+}
+
 .badge-type {
   &-grass {
     background-color: #a8ff98;

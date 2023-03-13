@@ -72,14 +72,15 @@ const Detail = () => {
         </Link>
       </div>
       {pokemonDetail.data && (
-        <div className='!z-5 relative flex justify-self-center rounded-[20px]  bg-clip-border shadow-3xl shadow-shadow-500 flex-col w-full !p-4 3xl:p-![18px] bg-white undefined'>
+        <div className='!z-5 relative flex justify-self-center rounded-[20px]  bg-clip-border shadow-3xl shadow-shadow-500 flex-col w-full !p-4 3xl:p-![18px]  undefined'>
           <div className='h-full w-full'>
             <div className='relative w-full aspect-square'>
               <img
                 src={pokemonDetail.data?.image}
-                className='mb-3 w-full rounded-xl 3xl:h-full 3xl:w-full h-[218px] p-[20px]'
+                className='mb-3 w-full rounded-xl 3xl:h-full 3xl:w-full h-[218px] p-[20px] absolute z-20'
                 alt=''
               />
+              <img src="\images\pokemon_bg.png" className="absolute top-0 h-[400px]" alt="" />
               <button className='absolute top-0 right-0 flex items-center justify-center rounded-full bg-white p-2 text-brand-500 hover:cursor-pointer'>
                 <div className='flex h-full w-full items-center justify-center rounded-full text-xl hover:bg-gray-50'>
                   <svg
