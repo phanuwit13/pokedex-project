@@ -36,8 +36,13 @@ export const generationList = [
   },
   {
     name: 'Generation VIII',
-    limit: 89,
+    limit: 96,
     offset: 809,
+  },
+  {
+    name: 'Generation IX',
+    limit: 105,
+    offset: 905,
   },
 ]
 

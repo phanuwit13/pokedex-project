@@ -83,7 +83,7 @@ const Detail = () => {
                   alt=''
                 />
                 <img
-                  src={pokemonDetail.data?.image}
+                  src={pokemonDetail.data?.sprites?.other?.dream_world?.front_default || pokemonDetail.data?.sprites?.other?.['official-artwork']?.front_default}
                   className='mb-3 w-full rounded-xl 3xl:h-full 3xl:w-full h-[180px] sm:h-[218px] p-[20px] absolute translate-x-[-50%] translate-y-[-50%] top-[50%] left-[50%]'
                   alt=''
                 />
