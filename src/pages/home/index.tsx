@@ -4,7 +4,7 @@ import ReactLoading from 'react-loading'
 import { usePokemonListStore } from '@/store/pokemonList'
 
 const Home = () => {
-  const { pokemon } = usePokemonListStore()
+  const { pokemon,fetchPokemon } = usePokemonListStore()
 
   return (
     <div className='w-[90%] max-w-[1100px] m-auto '>
@@ -16,7 +16,7 @@ const Home = () => {
         />
       </div>
       <SearchForm />
-      {pokemon.loading ? (
+      {fetchPokemon.loading ? (
         <div className='flex items-center justify-center  h-[70vh]'>
           <ReactLoading type='cubes' color='#3265AF' />
         </div>

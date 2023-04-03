@@ -4,14 +4,16 @@ import { generationList } from '@/utils/optionList'
 import { pokemonListServices, pokemonDetailServices } from '@/service'
 import { IPokemonDetailResponse } from '@/interface/pokemonDetail'
 import { usePokemonListStore } from '@/store/pokemonList'
+import { useSearchParams } from 'react-router-dom'
 
 const useSearchForm = () => {
+  const [searchParams, setSearchParams] = useSearchParams()
   const { register, watch } = useForm({
     defaultValues: {
-      type: 'all types',
-      generation: 0,
-      keyword: '',
-      sort: 'id',
+      type: searchParams.get('type') || 'all types',
+      generation: searchParams.get('generation') || 0,
+      keyword: searchParams.get('keyword') || '',
+      sort: searchParams.get('sort') || 'id',
     },
   })
 
@@ -48,7 +50,9 @@ const useSearchForm = () => {
       }
       const results = pokemonList.map((item) => ({
         ...item,
-        image: item?.sprites?.other?.dream_world?.front_default || item?.sprites?.other?.['official-artwork']?.front_default,
+        image:
+          item?.sprites?.other?.dream_world?.front_default ||
+          item?.sprites?.other?.['official-artwork']?.front_default,
       })) as unknown as IPokemonDetailResponse[]
       setFetchPokemonList({
         ...pokemon,
@@ -58,7 +62,12 @@ const useSearchForm = () => {
     }
   }
 
-  const filterPokemon = (keyword: string, type: string, key: 'id' | 'name') => {
+  const filterPokemon = (
+    pokeData: IPokemonDetailResponse[],
+    keyword: string,
+    type: string,
+    key: 'id' | 'name'
+  ) => {
     const filterKeyword = (data: IPokemonDetailResponse[]) => {
       return data.filter((item) =>
         item.name.toLowerCase().includes(keyword.toLowerCase())
@@ -67,16 +76,15 @@ const useSearchForm = () => {
 
     const result = filterKeyword(
       type.toLowerCase() !== 'all types'
-        ? fetchPokemon.data.filter((item) =>
+        ? pokeData.filter((item) =>
             item.types.find((v) =>
               v.type.name.toLowerCase().includes(type.toLowerCase())
             )
           )
-        : [...fetchPokemon.data]
+        : [...pokeData]
     )
 
     const dataResponse = sortBy(result, key)
-
     setPokemonList({ ...pokemon, data: dataResponse, loading: false })
   }
 
@@ -96,14 +104,31 @@ const useSearchForm = () => {
   }
 
   useEffect(() => {
-    filterPokemon(watchKeyword, watchType, watchSort)
-  }, [watchType, watchKeyword, watchSort])
+    const searchParams: {
+      generation?: string
+      keyword?: string
+      sort?: string
+      type?: string
+    } = {}
+    if (watchType) searchParams['generation'] = watchGeneration.toString()
+    if (watchType) searchParams['type'] = watchType
+    if (watchSort) searchParams['sort'] = watchSort
+    if (watchKeyword) searchParams['keyword'] = watchKeyword
+    if (Object.keys(searchParams).length) setSearchParams(searchParams)
+  }, [watchType, watchKeyword, watchSort, watchGeneration])
 
   useEffect(() => {
-    if (watchGeneration !== undefined) {
-      fetchPokemonList(generationList[watchGeneration])
+    if (searchParams.get('generation') !== undefined) {
+      fetchPokemonList(generationList[Number(searchParams.get('generation'))])
     }
-  }, [watchGeneration])
+  }, [searchParams.get('generation')])
+
+  useEffect(() => {
+    const keyword = searchParams.get('keyword') || ''
+    const sort = searchParams.get('sort') as 'id' | 'name'
+    const type = searchParams.get('type') || 'all types'
+    filterPokemon(fetchPokemon.data, keyword, type, sort)
+  }, [searchParams, fetchPokemon])
 
   return {
     fieldType: register('type'),
