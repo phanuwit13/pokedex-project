@@ -1,5 +1,5 @@
 import { useForm } from 'react-hook-form'
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import { generationList } from '@/utils/optionList'
 import { pokemonListServices, pokemonDetailServices } from '@/service'
 import { IPokemonDetailResponse } from '@/interface/pokemonDetail'
@@ -17,8 +17,14 @@ const useSearchForm = () => {
     },
   })
 
-  const { setFetchPokemonList, setPokemonList, pokemon, fetchPokemon } =
-    usePokemonListStore()
+  const {
+    setFetchPokemonList,
+    setPokemonList,
+    pokemon,
+    fetchPokemon,
+    setRefetch,
+    setHasMore,
+  } = usePokemonListStore()
 
   const watchType = watch('type')
   const watchGeneration = watch('generation')
@@ -30,24 +36,39 @@ const useSearchForm = () => {
     limit: number
     offset: number
   }) => {
+    const checkCurrentGen =
+      fetchPokemon.data[0]?.id >= filter.offset &&
+      fetchPokemon.data[0]?.id <= filter.limit + filter.offset
     let pokemonList = []
-    setFetchPokemonList({
-      ...pokemon,
-      loading: true,
-    })
+    if (checkCurrentGen) {
+      setFetchPokemonList({
+        ...pokemon,
+        loading: true,
+      })
+    } else {
+      setFetchPokemonList({
+        data: [],
+        error: null,
+        loading: true,
+      })
+    }
     const response = await pokemonListServices.getPokemonList(
       filter.limit,
       filter.offset
     )
     if (response.status === 200) {
       const pokemonResults = response.data?.results || []
-      for (let pokemon of pokemonResults) {
-        const response = await pokemonDetailServices.getPokemonDetail(
-          pokemon?.name
-        )
+      let limit = 20
+      const offset = checkCurrentGen ? fetchPokemon.data.length : 0
+      if (offset + limit > pokemonResults.length)
+        limit = pokemonResults.length - offset
+      for (let index = 0; index < limit; index++) {
+        const name = pokemonResults[index + offset].name
+        const response = await pokemonDetailServices.getPokemonDetail(name)
         const monster = await response?.data
         await pokemonList.push({ ...monster, score: 0 })
       }
+
       const results = pokemonList.map((item) => ({
         ...item,
         image:
@@ -55,10 +76,16 @@ const useSearchForm = () => {
           item?.sprites?.other?.['official-artwork']?.front_default,
       })) as unknown as IPokemonDetailResponse[]
       setFetchPokemonList({
-        ...pokemon,
-        data: results,
+        data: checkCurrentGen ? [...pokemon.data, ...results] : [...results],
         loading: false,
+        error: null,
       })
+      setHasMore(
+        !(
+          (response.data?.results.length || 0) ===
+          [...pokemon.data, ...results].length
+        )
+      )
     }
   }
 
@@ -117,9 +144,13 @@ const useSearchForm = () => {
     if (Object.keys(searchParams).length) setSearchParams(searchParams)
   }, [watchType, watchKeyword, watchSort, watchGeneration])
 
+  const handleRefetch = useCallback(() => {
+    fetchPokemonList(generationList[Number(searchParams.get('generation'))])
+  }, [pokemon, fetchPokemon, searchParams.get('generation')])
+
   useEffect(() => {
     if (searchParams.get('generation') !== undefined) {
-      fetchPokemonList(generationList[Number(searchParams.get('generation'))])
+      handleRefetch()
     }
   }, [searchParams.get('generation')])
 
@@ -129,6 +160,10 @@ const useSearchForm = () => {
     const type = searchParams.get('type') || 'all types'
     filterPokemon(fetchPokemon.data, keyword, type, sort)
   }, [searchParams, fetchPokemon])
+
+  useEffect(() => {
+    setRefetch(handleRefetch)
+  }, [handleRefetch, searchParams.get('generation')])
 
   return {
     fieldType: register('type'),
