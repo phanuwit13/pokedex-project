@@ -17,7 +17,6 @@ const Home = () => {
 
   return (
     <div className='w-[90%] max-w-[1100px] m-auto '>
-      <button onClick={handleRefetch}>refetch</button>
       <div className='flex m-auto w-fit '>
         <img
           src='/images/logo.webp'
